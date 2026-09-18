@@ -3,8 +3,8 @@ code for the 7T fMRI experiment on synesthesia
 
 anaconda environment psychopy
 
-experiment/01_main_task_fMRI_7T.py: the main task with 5 conditions
-experiment/02_color_localizer_fMRI_7T.py: the color localizer
+experiment/01_main_task_fMRI_7T.py: the main task with 5 conditions \n
+experiment/02_color_localizer_fMRI_7T.py: the color localizer \n
 experiment/03_vwfa_localizer_fMRI_7T.py: the visual word form area (VWFA) localizer
 
 Counterbalancing and stimuli orders are predetermined. 
