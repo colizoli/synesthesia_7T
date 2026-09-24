@@ -73,7 +73,7 @@ t_prompt        = 1.5         # time to present the prompt question in seconds
 
 lh = 100   # letter size
 ly = 6    # adjust letter up y-axis (pixels)
-ww = 1000  # wrap width of instructions text          
+ww = 2000  # wrap width of instructions text          
 
 scnWidth, scnHeight = (1920,1080) # MRI BOLDscreen 120Hz, # (1024,768) MRI stim computer, #(1280, 1024) # dummy scanner settings
 screen_width        = 53.5 # centimeters

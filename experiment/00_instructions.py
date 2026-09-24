@@ -24,10 +24,8 @@ import mri_7T_parameters as p # see for timing, stimuli and parameters
 #Get subject number
 g = gui.Dlg()
 g.addField('Subject Number:')
-g.addField('Run:')
 g.show()
 subject_ID = int(g.data[0])
-run = int(g.data[1])
 # in case GUI doesn't work
 # subject_ID = 1
 # run = 1
@@ -51,10 +49,10 @@ if subject_ID:
     symbols      = list(this_subject['non_inducing']) # graphemes that don't induce synesthesia
     
     columns = [
-        {'label': p.english_regular[1], 'font': p.english_regular[1], 'chars': graphemes},
-        {'label': p.english_italic[1],  'font': p.english_italic[1],  'chars': graphemes},
-        {'label': p.pseudo_regular[1],  'font': p.pseudo_regular[1],  'chars': symbols},
-        {'label': p.pseudo_italic[1],   'font': p.pseudo_italic[1],   'chars': symbols},
+        {'label': 'English', 'font': p.english_regular[1], 'chars': graphemes},
+        {'label': 'English Italics',  'font': p.english_italic[1],  'chars': graphemes},
+        {'label': 'False',  'font': p.pseudo_regular[1],  'chars': symbols},
+        {'label': 'False Italics',   'font': p.pseudo_italic[1],   'chars': symbols},
     ]
 
     font_files = [
@@ -183,48 +181,63 @@ if subject_ID:
     \nYou will see a sequence of letters, symbols, words and word-like strings in black and in color flashing one-by-one on screen.\
     \nYour task is always the same: monitor the sequence to see if you spot one instance in ITALICS.\
     \n\nThe series of stimuli are presented for ~16 seconds followed by a break where no stimuli is presented for an additional 16 seconds.\
-    \nDuring this break period, you will be asked to indicate if you saw one of the stimuli in italics or not.\
+    \n\nDuring this break period, you will be asked to indicate if you saw one of the stimuli in italics or not.\
     \nYou will use the button box to respond: yes/no. \
-    \nIf you are unsure, just guess! You can still push the button even after the question prompt dissapears.\
-    \n\nSo that you can get familiar with the stimuli and question prompt, we will show that to you now...\
+    \nIf you are unsure, just guess! You can still push the button even after the question prompt disappears.\
+    \n\nSo that you can get familiar with the question prompt, we will show that to you now...\
     \n\n[PUSH ANY BUTTON TO CONTINUE THE INSTRUCTIONS]"
     
-
-    welcome_txt_top = "You will see a series of symbols presented on screen.\
-    \nYour task is to view the symbols and notice if any of them are presented in ITALICS.\
-    \n\nA question will appear after each series of word strings, exactly like the example below:"
-
-    welcome_txt_bottom = "At that time, you can respond with a button press.\
-    \n\nMaintain eye-fixation at the center of the screen at all times\
-    \n(even when there are no symbols/words).\
-    \n\nLay as still as possible for the duration of the scan session\
-    \n(that includes between scans!)\
-    \n\n[Waiting for scanner...]"
+    welcome_txt_center3 = "Now we will show you what the different FONTs used will look like during the experiment.\
+    \nThere will be one English font and one fake or false font that should not mean anything to you.\
+    \n\n[PUSH ANY BUTTON TO CONTINUE THE INSTRUCTIONS]"
     
+    welcome_txt_center4 = "That's it, now we will shortly begin the real experiment!\
+    \n\n[PUSH ANY BUTTON TO COMPLETE THE INSTRUCTIONS]"
     
     #####################################
     # Instructions, waiting for scanner #
     #####################################
-    instr_top.setText(welcome_txt_top)
-    instr_bottom.setText(welcome_txt_bottom)
-
-    instr_top.draw()
-    stim_fix_outer.draw()
-    stim_fix_inner.draw()
+    # instructions 1 centered
+    instr_center.setText(welcome_txt_center1)
+    instr_center.draw()
+    win.flip()
+    event.waitKeys()
+    # instructions 2 centered
+    instr_center.setText(welcome_txt_center2)
+    instr_center.draw()
+    win.flip()
+    event.waitKeys()
+    
+    # show prompt + fixation
     stim_question.draw()
     stim_yes.draw()
     stim_no.draw()
+    stim_fix_outer.draw()
+    stim_fix_inner.draw()
+    # add this to continue
+    instr_bottom.setText("[PUSH ANY BUTTON TO CONTINUE THE INSTRUCTIONS]")
     instr_bottom.draw()
     win.flip()
+    event.waitKeys()
+
+    # instructions 3 centered
+    instr_center.setText(welcome_txt_center3)
+    instr_center.draw()
+    win.flip()
+    event.waitKeys()
     # -------------------------
-    # Draw and wait
+    # Draw fonts and wait
     # -------------------------
     for s in stims:
         s.draw()
     win.flip()
-
     event.waitKeys()
     
+    # instructions 4 centered
+    instr_center.setText(welcome_txt_center4)
+    instr_center.draw()
+    win.flip()
+    event.waitKeys()
     
     win.close()
     core.quit()
