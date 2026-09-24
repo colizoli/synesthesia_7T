@@ -171,8 +171,8 @@ if subject_ID:
     \nEven when the scanner is quiet and you think it is not measuring anything, it is very important to stay completely still.\
     \nTiny movements of 1-2 mm can be deterimental to the data quality.\
     \nHowever, you may blink like normal throughout the experiment!\
-    \n\nSecond, to reduce head motion, we also ask that you do not speak unless to tell us something is wrong.\
-    \nWe will ask if you are doing alright, and you can indicate YES by button press.\
+    \n\nSecond, to reduce head motion, we also ask that you do not speak unless it's crucial to tell us something is wrong with the experiment.\
+    \nWe will periodically ask if you are doing alright, and you can indicate YES by button press.\
     \nIf you want to end the experiment early at any time, press the ALARM BUTTON and we will take you out immediately.\
     \n\nFinally, there will be a small fixation cross at the center of the screen at all times during the experiment.\
     \nPlease maintain eye-fixation there even when there is nothing else on the screen (i.e., do not move your eyes around).\
@@ -180,8 +180,8 @@ if subject_ID:
     \n\n[PUSH ANY BUTTON TO CONTINUE THE INSTRUCTIONS]"
     
     welcome_txt_center2 = "During this experiment, you will be presented with a few versions of the same task:\
-    \nYou will see a series of letters, symbols, words and word-like strings in black and in color flashing one-by-one on screen.\
-    \nYour task is always the same: monitor the series of letters/symbols/words/word-like strings to see if you spot one instance in ITALICS.\
+    \nYou will see a sequence of letters, symbols, words and word-like strings in black and in color flashing one-by-one on screen.\
+    \nYour task is always the same: monitor the sequence to see if you spot one instance in ITALICS.\
     \n\nThe series of stimuli are presented for ~16 seconds followed by a break where no stimuli is presented for an additional 16 seconds.\
     \nDuring this break period, you will be asked to indicate if you saw one of the stimuli in italics or not.\
     \nYou will use the button box to respond: yes/no. \

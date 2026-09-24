@@ -72,6 +72,7 @@ t_prompt_onset  = [2, 4]      # time to wait for signal present prompt in rest b
 t_prompt        = 1.5         # time to present the prompt question in seconds
 
 lh = 100   # letter size
+ly = 6    # adjust letter up y-axis (pixels)
 ww = 1000  # wrap width of instructions text          
 
 scnWidth, scnHeight = (1920,1080) # MRI BOLDscreen 120Hz, # (1024,768) MRI stim computer, #(1280, 1024) # dummy scanner settings

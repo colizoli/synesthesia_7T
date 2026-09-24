@@ -94,7 +94,7 @@ if subject_ID:
     # Inner circle (black)
     stim_fix_inner = visual.Circle(win, radius=2, fillColor='black', lineColor='black', edges=128)
     
-    stim_word = visual.TextStim(win, color ='black', pos=(0.0, 0.0), height=p.lh) # SET FONT HERE, SCALING
+    stim_word = visual.TextStim(win, color ='black', pos=(0.0, p.ly), height=p.lh) # SET FONT HERE, SCALING
     stim_word.fontFiles = [
         os.path.join('font', p.pseudo_regular[0]), 
         os.path.join('font', p.pseudo_italic[0]), 
