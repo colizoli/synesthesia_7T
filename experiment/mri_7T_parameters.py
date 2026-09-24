@@ -23,11 +23,8 @@ General parameters and functions for scanning
 
 debug_mode = True
 fmri_mode = False   # waits for trigger to start stimuli blocks
-
+scanner = False     # everything coming in as keyboard
 trigger_key = ['5']
-#buttons = ['b','y','g','r','w']
-buttons = ['1','2','3','4']
-scanner = False # everything coming in as keyboard
 
 if scanner: # when you are really scanning 
     ## Trigger from SerialPort: com3 SerialPort number, baudrate 115200, parity none, databits 8, stopbits 1, ASCIICODE 97
@@ -57,13 +54,16 @@ def waitForTrigger(clock,):
                 if respond == ['q']: core.quit() #  escape allows us to exit 
                 break # else begin the experiment 
     return respond
- 
+    
+################### 
 # shared parameters
-
-keys = ['left', 'right']      # signal present yes/no
+###################
+# response buttons
+keys = ['1','2']   # buttons 1 and 2, yes vs. no counterbalanced
+#keys = ['b','y','g','r','w']
 
 # timing
-t_bold_baseline = 12          # bold baseline period in seconds, show fixation cross at the beginning and end of the run
+t_bold_baseline = 16          # bold baseline period in seconds, show fixation cross at the beginning and end of the run
 t_fix           = [0.2, 0.24] # pre-grapheme fixation in seconds jittered 
 t_grapheme      = 0.75        # presentation duration of grapheme in seconds 
 t_word          = t_grapheme  # same duration in VWFA
@@ -71,10 +71,10 @@ t_rest          = 16          # duration of rest period in between blocks (fixat
 t_prompt_onset  = [2, 4]      # time to wait for signal present prompt in rest blocks
 t_prompt        = 1.5         # time to present the prompt question in seconds
 
-lh = 100    # letter size
+lh = 100   # letter size
 ww = 1000  # wrap width of instructions text          
 
-scnWidth, scnHeight = (1920,1080) # MRI BOLDscreen, # (1024,768) MRI stim computer, #(1280, 1024) # dummy scanner settings
+scnWidth, scnHeight = (1920,1080) # MRI BOLDscreen 120Hz, # (1024,768) MRI stim computer, #(1280, 1024) # dummy scanner settings
 screen_width        = 53.5 # centimeters
 screen_dist         = 70.0
 white               = [255,255,255] # background screen color
