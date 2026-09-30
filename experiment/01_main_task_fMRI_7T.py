@@ -479,8 +479,10 @@ print('Scan time (s) = {}'.format(clock.getTime() - first_pulse))
 # End of run, take a quick break
 stim_word.setText("This run is over! \n\n You can close your eyes for a few seconds.")
 stim_word.setColor(np.array([0,0,0]), 'rgb255')
+stim_word.font = 'Arial'
+stim_word.height = 20
 stim_word.draw() 
 win.flip()
-core.wait(1.5) # just wait max 1 TR for scanner to stop
+core.wait(3) # just wait max 1 TR for scanner to stop
 win.close()
 core.quit()

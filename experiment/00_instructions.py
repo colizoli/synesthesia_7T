@@ -169,7 +169,7 @@ if subject_ID:
     \nEven when the scanner is quiet and you think it is not measuring anything, it is very important to stay completely still.\
     \nTiny movements of 1-2 mm can be deterimental to the data quality.\
     \nHowever, you may blink like normal throughout the experiment!\
-    \n\nSecond, to reduce head motion, we also ask that you do not speak unless it's crucial to tell us something is wrong with the experiment.\
+    \n\nSecond, to reduce head motion, we also ask that you do not speak at all.\
     \nWe will periodically ask if you are doing alright, and you can indicate YES by button press.\
     \nIf you want to end the experiment early at any time, press the ALARM BUTTON and we will take you out immediately.\
     \n\nFinally, there will be a small fixation cross at the center of the screen at all times during the experiment.\
@@ -188,7 +188,7 @@ if subject_ID:
     \n\n[PUSH ANY BUTTON TO CONTINUE THE INSTRUCTIONS]"
     
     welcome_txt_center3 = "Now we will show you what the different FONTs used will look like during the experiment.\
-    \nThere will be one English font and one fake or false font that should not mean anything to you.\
+    \nThere will be one English font and one false font that should not mean anything to you.\
     \n\n[PUSH ANY BUTTON TO CONTINUE THE INSTRUCTIONS]"
     
     welcome_txt_center4 = "That's it, now we will shortly begin the real experiment!\

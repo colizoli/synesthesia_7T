@@ -21,7 +21,7 @@ from psychopy import event
 General parameters and functions for scanning
 """
 
-debug_mode = True
+debug_mode = False
 fmri_mode = False   # waits for trigger to start stimuli blocks
 scanner = False     # everything coming in as keyboard
 trigger_key = ['5']
@@ -71,7 +71,7 @@ t_rest          = 16          # duration of rest period in between blocks (fixat
 t_prompt_onset  = [2, 4]      # time to wait for signal present prompt in rest blocks
 t_prompt        = 1.5         # time to present the prompt question in seconds
 
-lh = 100   # letter size
+lh = 150   # letter size
 ly = 6    # adjust letter up y-axis (pixels)
 ww = 2000  # wrap width of instructions text          
 
