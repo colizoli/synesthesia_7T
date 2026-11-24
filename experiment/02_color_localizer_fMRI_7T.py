@@ -23,7 +23,7 @@ from psychopy import core, visual, event, gui, monitors
 import random
 import numpy as np
 import pandas as pd
-from IPython import embed as shell # for debugging only
+# from IPython import embed as shell # for debugging only
 import mri_7T_parameters as p # see for timing, stimuli and parameters
 
 #########################################
@@ -32,27 +32,25 @@ import mri_7T_parameters as p # see for timing, stimuli and parameters
 
 #Get subject number
 g = gui.Dlg()
-g.addField('Group (syn vs. con):')
 g.addField('Subject Number:')
 g.addField('Run:')
 g.show()
-if g.data[0] == 'syn':
-    group = 'synesthete'
-else:
-    group = 'control'
-subject_ID = int(g.data[1])
-run = int(g.data[2])
+subject_ID = int(g.data[0])
+run = int(g.data[1])
+# in case GUI doesn't work
+# subject_ID = 1
+# run = 1
 
 if subject_ID:
-    random.seed(int(subject_ID))
+    random.seed(subject_ID)
     #########################################
     ################ STIMULI ################
     #########################################
     
     # get subject-specifc blocks and stimuli sequences
-    df_sequences = pd.read_csv(os.path.join('stimuli_blocks', 'color_localizer', 'sub-{}_letter_sequences_color_localizer.csv'.format(str(subject_ID).zfill(2))))
-    df_special = pd.read_csv(os.path.join('stimuli_blocks', 'color_localizer', 'sub-{}_letter_italics_color_localizer.csv'.format(str(subject_ID).zfill(2))))
-    df_condition = pd.read_csv(os.path.join('stimuli_blocks', 'color_localizer', 'sub-{}_block_type_color_localizer.csv'.format(str(subject_ID).zfill(2))))
+    df_sequences = pd.read_csv(os.path.join('stimuli_blocks', 'color_localizer', 'sub-{}_letter_sequences_color_localizer.csv'.format(subject_ID)))
+    df_special = pd.read_csv(os.path.join('stimuli_blocks', 'color_localizer', 'sub-{}_letter_italics_color_localizer.csv'.format(subject_ID)))
+    df_condition = pd.read_csv(os.path.join('stimuli_blocks', 'color_localizer', 'sub-{}_block_type_color_localizer.csv'.format(subject_ID)))
     # get list
     blocks = df_condition.iloc[0].tolist() # color, black in order of blocks
 
@@ -69,7 +67,7 @@ if subject_ID:
         yes_pos, no_pos = (50, -50), (-50, -50)
     
     # get subject-specific stimuli
-    this_subject = pd.read_csv(os.path.join('colors', 'sub-{}_colors.csv'.format(str(subject_ID).zfill(2))))
+    this_subject = pd.read_csv(os.path.join('colors', 'sub-{}_colors.csv'.format(subject_ID)))
     symbols = list(this_subject['non_inducing'])
     colors = this_subject[['r', 'g', 'b']].values.tolist() # use subject-specific colors 
         
@@ -89,10 +87,12 @@ if subject_ID:
     win.setMouseVisible(False)
 
     # Set-up stimuli and timing
-    instr_top = visual.TextStim(win, color='black', pos=(0.0, 130), wrapWidth=p.ww, height=p.ih)
-    instr_bottom = visual.TextStim(win, color='black', pos=(0.0, -180), wrapWidth=p.ww, height=p.ih)
+    instr_top = visual.TextStim(win, color='black', pos=(0.0, 130), wrapWidth=p.ww)
+    instr_bottom = visual.TextStim(win, color='black', pos=(0.0, -180), wrapWidth=p.ww)
     # Outer circle (grey)
-    stim_fix_outer = visual.Circle(win, radius=4, fillColor='grey', lineColor='grey', edges=128)
+    stim_fix_outer = visual.Circle(win, radius=5, fillColor='grey', lineColor='grey', edges=128)
+    # Inner circle (black)
+    stim_fix_inner = visual.Circle(win, radius=2, fillColor='black', lineColor='black', edges=128)
     
     stim_word = visual.TextStim(win, color ='black', pos=(0.0, p.ly), height=p.lh) # SET FONT HERE, SCALING
     stim_word.fontFiles = [
@@ -147,7 +147,7 @@ if subject_ID:
     #######################
     ## Create LogFile folder cwd/LogFiles
     cwd = os.getcwd()
-    logfile_dir = os.path.join(cwd, 'sourcedata', 'sub-{}{}'.format(group, str(subject_ID).zfill(2)), 'func')  # system independent
+    logfile_dir = os.path.join(cwd, 'sourcedata', 'sub-{}'.format(subject_ID), 'func')  # system independent
     
     if not os.path.isdir(logfile_dir): # make the folder if it doesn't exist already
         os.makedirs(logfile_dir)
@@ -155,7 +155,7 @@ if subject_ID:
     ## output file name with time stamp prevents any overwriting of data
     timestr = time.strftime("%Y%m%d-%H%M%S") 
     # bids format    
-    output_filename = os.path.join(logfile_dir, 'sub-{}{}_task-colorsloc_run-{}_events_{}.tsv'.format(group, str(subject_ID).zfill(2), run, timestr))
+    output_filename = os.path.join(logfile_dir, 'sub-{}_task-colorsloc_run-{}_events_{}.tsv'.format(subject_ID, run, timestr))
  
     cols = ['subject',
               'run',
@@ -193,6 +193,7 @@ if subject_ID:
 
     instr_top.draw()
     stim_fix_outer.draw()
+    stim_fix_inner.draw()
     stim_question.draw()
     stim_yes.draw()
     stim_no.draw()
@@ -212,6 +213,7 @@ if subject_ID:
     # BOLD BASELINE (BEGINNING OF RUN) #
     ####################################
     stim_fix_outer.draw()
+    stim_fix_inner.draw()
     win.flip()
     # Wait for bold baseline, catch buttons for quitting early
     respond = event.waitKeys(maxWait=p.t_bold_baseline, keyList=['q'])
@@ -251,6 +253,7 @@ if subject_ID:
                            
             # Pre grapheme fixation cross (small jitter)
             stim_fix_outer.draw()
+            stim_fix_inner.draw() 
             win.flip()
             core.wait(np.random.uniform(*p.t_fix)) # *interval unpacks the interval from the list
 
@@ -266,6 +269,7 @@ if subject_ID:
             stim_word.setColor(this_color, 'rgb255')
             stim_word.draw() 
             stim_fix_outer.draw()
+            stim_fix_inner.draw()
             win.flip()
             this_word_time = clock.getTime() - first_pulse # get timing of word with respect to first pulse
             core.wait(p.t_grapheme)
@@ -304,6 +308,7 @@ if subject_ID:
         ### ADD WAIT FOR TRIGGER ? ###
         ############################
         # stim_fix_outer.draw()
+        # stim_fix_inner.draw()
         # win.flip()
         # p.waitForTrigger(clock)  # also clears events      
         
@@ -311,6 +316,7 @@ if subject_ID:
         
         # fixation only
         stim_fix_outer.draw()
+        stim_fix_inner.draw()
         win.flip()
         core.wait(prompt_onset)    
         
@@ -319,6 +325,7 @@ if subject_ID:
         stim_yes.draw()
         stim_no.draw()
         stim_fix_outer.draw()
+        stim_fix_inner.draw()
         win.flip()
 
         prompt_onset_time = clock.getTime() # marks when the prompt appeared, same clock as first_pulse
@@ -340,6 +347,7 @@ if subject_ID:
 
         # --- Phase 2: prompt gone, fixation only, keep monitoring for the remaining rest period ---
         stim_fix_outer.draw()
+        stim_fix_inner.draw()
         win.flip()
 
         remaining_time = p.t_rest - (prompt_onset + p.t_prompt) # time left in the rest block
@@ -394,6 +402,7 @@ if subject_ID:
     # BOLD BASELINE (END OF RUN) #
     ##############################
     stim_fix_outer.draw()
+    stim_fix_inner.draw()
     win.flip()
     core.wait(p.t_bold_baseline)
 

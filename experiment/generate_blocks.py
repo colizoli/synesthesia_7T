@@ -249,7 +249,7 @@ def counterbalancing_task_conditions(n_subjects):
     print("success: counterbalancing_task_conditions")
 
 
-def define_blocks_color_localizer(n_subjects, n_runs):
+def define_blocks_color_localizer(n_subjects):
     """
     Define the color order, letter order, and signal present for
     each block of the color localizer, for every subject.
@@ -265,8 +265,6 @@ def define_blocks_color_localizer(n_subjects, n_runs):
     n_subjects : int
         Number of subjects to generate block sequences for. Subject
         numbers run from 1 to n_subjects.
-    n_runs : int
-        Number of runs per subject to generate block sequences for. 
 
     Requires
     --------
@@ -295,54 +293,45 @@ def define_blocks_color_localizer(n_subjects, n_runs):
     for s in range(n_subjects):
         
         this_subject = s+1 # start with 1
+        seq_data = {}
+        mask_data = {}
+
+        block_cols = [f'block_{b}' for b in range(n_blocks)]
+
+        # Randomly choose half the blocks to contain the signal
+        special_blocks = set(random.sample(block_cols, k=n_blocks // 2))
+
+        for block in range(n_blocks):
+            col = f'block_{block}'
+            sequence = list(range(numbers_per_block)) * repeats_per_block # multiple stimuli if necessary
+            sequence = shuffle_no_adjacent_repeats(sequence) # suffle and make sure no two-in-a-row
+            seq_data[col] = sequence
+
+            if col in special_blocks:
+                special_idx = random.randrange(len(sequence))
+                mask = [1 if i == special_idx else 0 for i in range(len(sequence))]
+            else:
+                mask = [0] * len(sequence)
+
+            mask_data[col] = mask
+
+        df_sequences = pd.DataFrame(seq_data)
+        df_special = pd.DataFrame(mask_data)
         
-        for r in range(n_runs):
-        
-            this_run = r+1 # start with run 1
-            seq_data = {}
-            mask_data = {}
-            
-            block_cols = [f'block_{b}' for b in range(n_blocks)]
-        
-            # Determine color vs black per block, alternating, starting type from counterbalancing file
-            start_type = df_counterbalancing.loc[df_counterbalancing['subject'] == this_subject, 'color_start'].values[0]
-            other_type = 'black' if start_type == 'color' else 'color'
-            block_types = [start_type if b % 2 == 0 else other_type for b in range(n_blocks)]
-            # counterbalance order across runs
-            if this_run % 2 == 0:
-                swap = {'color': 'black', 'black': 'color'}
-                block_types = [swap[x] for x in block_types]
-            df_condition = pd.DataFrame([block_types], columns=block_cols)
+        # Determine color vs black per block, alternating, starting type from counterbalancing file
+        start_type = df_counterbalancing.loc[df_counterbalancing['subject'] == this_subject, 'color_start'].values[0]
+        other_type = 'black' if start_type == 'color' else 'color'
+        block_types = [start_type if b % 2 == 0 else other_type for b in range(n_blocks)]
+        df_condition = pd.DataFrame([block_types], columns=block_cols)
 
-            # Randomly choose half the blocks to contain the signal
-            special_blocks = set(random.sample(block_cols, k=n_blocks // 2))
-
-            for block in range(n_blocks):
-                col = f'block_{block}'
-                sequence = list(range(numbers_per_block)) * repeats_per_block # multiple stimuli if necessary
-                sequence = shuffle_no_adjacent_repeats(sequence) # shuffle and make sure no two-in-a-row
-                seq_data[col] = sequence
-
-                if col in special_blocks:
-                    special_idx = random.randrange(len(sequence))
-                    mask = [1 if i == special_idx else 0 for i in range(len(sequence))]
-                else:
-                    mask = [0] * len(sequence)
-
-                mask_data[col] = mask
-
-            df_sequences = pd.DataFrame(seq_data)
-            df_special = pd.DataFrame(mask_data)
-            
-            # save output
-            df_sequences.to_csv(os.path.join(output_dir, 'sub-{}_run-{}_letter_sequences_color_localizer.csv'.format(str(this_subject).zfill(2), str(this_run).zfill(2))), index=False)
-            df_special.to_csv(os.path.join(output_dir, 'sub-{}_run-{}_letter_italics_color_localizer.csv'.format(str(this_subject).zfill(2), str(this_run).zfill(2))), index=False)
-            df_condition.to_csv(os.path.join(output_dir, 'sub-{}_run-{}_block_type_color_localizer.csv'.format(str(this_subject).zfill(2), str(this_run).zfill(2))), index=False)
+        df_sequences.to_csv(os.path.join(output_dir, 'sub-{}_letter_sequences_color_localizer.csv'.format(this_subject)), index=False)
+        df_special.to_csv(os.path.join(output_dir, 'sub-{}_letter_italics_color_localizer.csv'.format(this_subject)), index=False)
+        df_condition.to_csv(os.path.join(output_dir, 'sub-{}_block_type_color_localizer.csv'.format(this_subject)), index=False)
         print(this_subject)
     print("success: define_blocks_color_localizer")
 
 
-def define_blocks_vwfa_localizer(n_subjects, n_runs):
+def define_blocks_vwfa_localizer(n_subjects):
     """
     Define the condition order, letter order, and signal present for
     each block of the VWFA localizer, for every subject.
@@ -366,9 +355,7 @@ def define_blocks_vwfa_localizer(n_subjects, n_runs):
     n_subjects : int
         Number of subjects to generate block sequences for. Subject
         numbers run from 1 to n_subjects.
-    n_runs : int
-        Number of runs per subject to generate block sequences for. 
-    
+
     Requires
     --------
     counterbalancing_task_conditions(n_subjects) must be run first,
@@ -399,69 +386,61 @@ def define_blocks_vwfa_localizer(n_subjects, n_runs):
     for s in range(n_subjects):
         
         this_subject = s+1 # start with 1
+        seq_data = {}
+        mask_data = {}
+
         block_cols = [f'block_{b}' for b in range(n_blocks)]
-        
-        for r in range(n_runs):
-        
-            this_run = r+1 # start with run 1
-            seq_data = {}
-            mask_data = {}
+
+        # Randomly choose half the blocks to contain the signal
+        special_blocks = set(random.sample(block_cols, k=n_blocks // 2))
+
+        # Determine word vs pseudoword per block FIRST, since sequences depend on it
+        start_type = df_counterbalancing.loc[df_counterbalancing['subject'] == this_subject, 'vwfa_order'].values[0]
+        other_type = 'pseudo' if start_type == 'word' else 'word'
+        block_types = [start_type if b % 2 == 0 else other_type for b in range(n_blocks)]
+        df_condition = pd.DataFrame([block_types], columns=block_cols)
+
+        # Same underlying set of items, shuffled independently per condition
+        pool_word = list(range(n_words_half))
+        random.shuffle(pool_word)
+
+        pool_pseudo = list(range(n_words_half))
+        random.shuffle(pool_pseudo)
+
+        word_counter = 0
+        pseudo_counter = 0
+        for block in range(n_blocks):
+            col = f'block_{block}'
+            condition = block_types[block]
+
+            if condition == 'word':
+                sequence = pool_word[word_counter*numbers_per_block : (word_counter+1)*numbers_per_block]
+                word_counter += 1
+            else:
+                sequence = pool_pseudo[pseudo_counter*numbers_per_block : (pseudo_counter+1)*numbers_per_block]
+                pseudo_counter += 1
+
+            seq_data[col] = sequence
             
-            # Determine word vs pseudoword per block FIRST, since sequences depend on it
-            start_type = df_counterbalancing.loc[df_counterbalancing['subject'] == this_subject, 'vwfa_order'].values[0]
-            other_type = 'pseudo' if start_type == 'word' else 'word'
-            block_types = [start_type if b % 2 == 0 else other_type for b in range(n_blocks)]
-            # counterbalance order across runs
-            if this_run % 2 == 0:
-                swap = {'pseudo': 'word', 'word': 'pseudo'}
-                block_types = [swap[x] for x in block_types]
-            df_condition = pd.DataFrame([block_types], columns=block_cols)
-            df_condition = pd.DataFrame([block_types], columns=block_cols)
-            
-            # Randomly choose half the blocks to contain the signal
-            special_blocks = set(random.sample(block_cols, k=n_blocks // 2))
+            if col in special_blocks:
+                special_idx = random.randrange(len(sequence))
+                mask = [1 if i == special_idx else 0 for i in range(len(sequence))]
+            else:
+                mask = [0] * len(sequence)
 
-            # Same underlying set of items, shuffled independently per condition
-            pool_word = list(range(n_words_half))
-            random.shuffle(pool_word)
+            mask_data[col] = mask
 
-            pool_pseudo = list(range(n_words_half))
-            random.shuffle(pool_pseudo)
+        df_sequences = pd.DataFrame(seq_data)
+        df_special = pd.DataFrame(mask_data)
 
-            word_counter = 0
-            pseudo_counter = 0
-            for block in range(n_blocks):
-                col = f'block_{block}'
-                condition = block_types[block]
-
-                if condition == 'word':
-                    sequence = pool_word[word_counter*numbers_per_block : (word_counter+1)*numbers_per_block]
-                    word_counter += 1
-                else:
-                    sequence = pool_pseudo[pseudo_counter*numbers_per_block : (pseudo_counter+1)*numbers_per_block]
-                    pseudo_counter += 1
-
-                seq_data[col] = sequence
-            
-                if col in special_blocks:
-                    special_idx = random.randrange(len(sequence))
-                    mask = [1 if i == special_idx else 0 for i in range(len(sequence))]
-                else:
-                    mask = [0] * len(sequence)
-
-                mask_data[col] = mask
-
-            df_sequences = pd.DataFrame(seq_data)
-            df_special = pd.DataFrame(mask_data)
-
-            df_sequences.to_csv(os.path.join(output_dir, 'sub-{}_run-{}_word_sequences_vwfa_localizer.csv'.format(str(this_subject).zfill(2), str(this_run).zfill(2))), index=False)
-            df_special.to_csv(os.path.join(output_dir, 'sub-{}_run-{}_word_italics_vwfa_localizer.csv'.format(str(this_subject).zfill(2), str(this_run).zfill(2))), index=False)
-            df_condition.to_csv(os.path.join(output_dir, 'sub-{}_run-{}_block_type_vwfa_localizer.csv'.format(str(this_subject).zfill(2), str(this_run).zfill(2))), index=False)
-            print(this_subject)
+        df_sequences.to_csv(os.path.join(output_dir, 'sub-{}_word_sequences_vwfa_localizer.csv'.format(this_subject)), index=False)
+        df_special.to_csv(os.path.join(output_dir, 'sub-{}_word_italics_vwfa_localizer.csv'.format(this_subject)), index=False)
+        df_condition.to_csv(os.path.join(output_dir, 'sub-{}_block_type_vwfa_localizer.csv'.format(this_subject)), index=False)
+        print(this_subject)
     print("success: define_blocks_vwfa_localizer")
     
     
-def define_blocks_main_task(n_subjects, n_runs):
+def define_blocks_main_task(n_subjects):
     """
     Define the condition order, letter order, and signal present for
     each block of the main task, for every subject.
@@ -491,9 +470,7 @@ def define_blocks_main_task(n_subjects, n_runs):
     n_subjects : int
         Number of subjects to generate block sequences for. Subject
         numbers run from 1 to n_subjects.
-    n_runs : int
-        Number of runs per subject to generate block sequences for. 
-    
+
     Output
     ------
     Per subject, writes four CSVs to 'stimuli_blocks/main_task/':
@@ -514,89 +491,82 @@ def define_blocks_main_task(n_subjects, n_runs):
     for s in range(n_subjects):
 
         this_subject = s+1 # start with 1
-        
-        for r in range(n_runs):
-            
-            this_run = r+1
-            seq_data = {}
-            mask_data = {}
-            grapheme_color_map_data = {}
-            
-            block_cols = [f'block_{b}' for b in range(n_conditions*n_repeat_conditions)]
-            # shuffle blocks in chunks while preventing same condition twice in a row
-            block_sequence = shuffle_chunks_no_boundary_repeat(list(range(n_conditions)), n_repeat_conditions)
+        seq_data = {}
+        mask_data = {}
+        grapheme_color_map_data = {}
 
-            # Randomly choose half the blocks to contain the signal
-            special_blocks = set(random.sample(block_cols, k=len(block_cols) // 2))
+        block_cols = [f'block_{b}' for b in range(n_conditions*n_repeat_conditions)]
+        # shuffle blocks in chunks while preventing same condition twice in a row
+        block_sequence = shuffle_chunks_no_boundary_repeat(list(range(n_conditions)), n_repeat_conditions)
+        # Randomly choose half the blocks to contain the signal
+        special_blocks = set(random.sample(block_cols, k=len(block_cols) // 2))
 
-            # Condition #4 (0-indexed: 3): full coverage, every grapheme gets all
-            # 8 colors across its 4 blocks. Color maps for all 4 blocks are
-            # generated TOGETHER (not independently) so pairings are guaranteed
-            # to be maximally spread, rather than left to chance per block.
-            condition4_block_indices = [b for b, c in enumerate(block_sequence) if c == 3]
-            condition4_pair_maps = generate_full_coverage_color_pairs(
-                numbers_per_block, len(condition4_block_indices), repeats_per_block
-            )
-            block_to_pair_map = dict(zip(condition4_block_indices, condition4_pair_maps))
+        # Condition #4 (0-indexed: 3): full coverage, every grapheme gets all
+        # 8 colors across its 4 blocks. Color maps for all 4 blocks are
+        # generated TOGETHER (not independently) so pairings are guaranteed
+        # to be maximally spread, rather than left to chance per block.
+        condition4_block_indices = [b for b, c in enumerate(block_sequence) if c == 3]
+        condition4_pair_maps = generate_full_coverage_color_pairs(
+            numbers_per_block, len(condition4_block_indices), repeats_per_block
+        )
+        block_to_pair_map = dict(zip(condition4_block_indices, condition4_pair_maps))
 
-            # Condition #5 (0-indexed: 4): incongruent, grapheme never gets its
-            # own color, with the "extra" doubled color balanced across graphemes.
-            condition5_block_indices = [b for b, c in enumerate(block_sequence) if c == 4]
-            condition5_pair_maps = generate_incongruent_color_pairs(
-                numbers_per_block, len(condition5_block_indices), repeats_per_block
-            )
-            block_to_pair_map.update(dict(zip(condition5_block_indices, condition5_pair_maps)))
+        # Condition #5 (0-indexed: 4): incongruent, grapheme never gets its
+        # own color, with the "extra" doubled color balanced across graphemes.
+        condition5_block_indices = [b for b, c in enumerate(block_sequence) if c == 4]
+        condition5_pair_maps = generate_incongruent_color_pairs(
+            numbers_per_block, len(condition5_block_indices), repeats_per_block
+        )
+        block_to_pair_map.update(dict(zip(condition5_block_indices, condition5_pair_maps)))
 
-            for block in range(len(block_cols)):
-                col = f'block_{block}'
-                sequence = list(range(numbers_per_block)) * repeats_per_block # multiple stimuli if necessary
-                sequence = shuffle_no_adjacent_repeats(sequence) # shuffle and make sure no two-in-a-row
-                seq_data[col] = sequence
+        for block in range(len(block_cols)):
+            col = f'block_{block}'
+            sequence = list(range(numbers_per_block)) * repeats_per_block # multiple stimuli if necessary
+            sequence = shuffle_no_adjacent_repeats(sequence) # suffle and make sure no two-in-a-row
+            seq_data[col] = sequence
 
-                if col in special_blocks:
-                    special_idx = random.randrange(len(sequence))
-                    mask = [1 if i == special_idx else 0 for i in range(len(sequence))]
-                else:
-                    mask = [0] * len(sequence)
+            if col in special_blocks:
+                special_idx = random.randrange(len(sequence))
+                mask = [1 if i == special_idx else 0 for i in range(len(sequence))]
+            else:
+                mask = [0] * len(sequence)
 
-                mask_data[col] = mask
+            mask_data[col] = mask
 
-                # For condition #4 and #5 blocks, expand this block's grapheme->color
-                # pair mapping to the full per-trial sequence length, so row i here
-                # lines up with row i of seq_data/mask_data.
-                if block in block_to_pair_map:
-                    pair_map = block_to_pair_map[block]
-                    occurrence_count = {g: 0 for g in range(numbers_per_block)}
-                    color_sequence = []
-                    for g in sequence:
-                        idx = occurrence_count[g]
-                        color_sequence.append(pair_map[g][idx])
-                        occurrence_count[g] += 1
-                    grapheme_color_map_data[col] = color_sequence
-                else:
-                    grapheme_color_map_data[col] = [''] * len(sequence)  # not applicable for this block
+            # For condition #4 and #5 blocks, expand this block's grapheme->color
+            # pair mapping to the full per-trial sequence length, so row i here
+            # lines up with row i of seq_data/mask_data.
+            if block in block_to_pair_map:
+                pair_map = block_to_pair_map[block]
+                occurrence_count = {g: 0 for g in range(numbers_per_block)}
+                color_sequence = []
+                for g in sequence:
+                    idx = occurrence_count[g]
+                    color_sequence.append(pair_map[g][idx])
+                    occurrence_count[g] += 1
+                grapheme_color_map_data[col] = color_sequence
+            else:
+                grapheme_color_map_data[col] = [''] * len(sequence)  # not applicable for this block
 
-            df_sequences = pd.DataFrame(seq_data)
-            df_special = pd.DataFrame(mask_data)
+        df_sequences = pd.DataFrame(seq_data)
+        df_special = pd.DataFrame(mask_data)
 
-            # Output condition per block, alternating
-            df_condition = pd.DataFrame([block_sequence], columns=block_cols)
-            df_grapheme_color_map = pd.DataFrame(grapheme_color_map_data)
-            
-            # save output
-            df_sequences.to_csv(os.path.join(output_dir, 'sub-{}_run-{}_letter_sequences_main_task.csv'.format(str(this_subject).zfill(2), str(this_run).zfill(2))), index=False)
-            df_special.to_csv(os.path.join(output_dir, 'sub-{}_run-{}_letter_italics_main_task.csv'.format(str(this_subject).zfill(2), str(this_run).zfill(2))), index=False)
-            df_grapheme_color_map.to_csv(os.path.join(output_dir, 'sub-{}_run-{}_grapheme_color_map_main_task.csv'.format(str(this_subject).zfill(2), str(this_run).zfill(2))), index=False)
-            df_condition.to_csv(os.path.join(output_dir, 'sub-{}_run-{}_block_type_main_task.csv'.format(str(this_subject).zfill(2), str(this_run).zfill(2))), index=False)
-            print(this_subject)
+        # Output condition per block, alternating
+        df_condition = pd.DataFrame([block_sequence], columns=block_cols)
+        df_grapheme_color_map = pd.DataFrame(grapheme_color_map_data)
+
+        df_sequences.to_csv(os.path.join(output_dir, 'sub-{}_letter_sequences_main_task.csv'.format(this_subject)), index=False)
+        df_special.to_csv(os.path.join(output_dir, 'sub-{}_letter_italics_main_task.csv'.format(this_subject)), index=False)
+        df_condition.to_csv(os.path.join(output_dir, 'sub-{}_block_type_main_task.csv'.format(this_subject)), index=False)
+        df_grapheme_color_map.to_csv(os.path.join(output_dir, 'sub-{}_grapheme_color_map_main_task.csv'.format(this_subject)), index=False)
+        print(this_subject)
     print("success: define_blocks_main_task")
     
     
 if __name__ == "__main__":
     random.seed(42)
-    n_subjects = 30
-    n_runs = 2
+    n_subjects = 60
     # counterbalancing_task_conditions(n_subjects)
-    # define_blocks_color_localizer(n_subjects, n_runs)
-    define_blocks_vwfa_localizer(n_subjects, n_runs)
-    # define_blocks_main_task(n_subjects, n_runs)
+    define_blocks_color_localizer(n_subjects)
+    define_blocks_vwfa_localizer(n_subjects)
+    # define_blocks_main_task(n_subjects)
