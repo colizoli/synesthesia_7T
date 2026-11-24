@@ -79,7 +79,7 @@ if subject_ID:
         key_to_answer = {'1': 'no', '2': 'yes'}
         yes_pos, no_pos = (50, -50), (-50, -50)
     
-    this_subject = pd.read_csv(os.path.join('colors', 'sub-{}_colors.csv'.format(subject_ID)))
+    this_subject = pd.read_csv(os.path.join('colors', 'sub-{}_colors.csv'.format(str(subject_ID).zfill(2))))
     graphemes    = list(this_subject['inducing'])     # synesthesia inducing graphemes
     symbols      = list(this_subject['non_inducing']) # graphemes that don't induce synesthesia
     colors       = this_subject[['r', 'g', 'b']].values.tolist() # colors of the inducing stimuli

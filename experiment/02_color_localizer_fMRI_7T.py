@@ -69,7 +69,7 @@ if subject_ID:
         yes_pos, no_pos = (50, -50), (-50, -50)
     
     # get subject-specific stimuli
-    this_subject = pd.read_csv(os.path.join('colors', 'sub-{}_colors.csv'.format(subject_ID)))
+    this_subject = pd.read_csv(os.path.join('colors', 'sub-{}_colors.csv'.format(str(subject_ID).zfill(2))))
     symbols = list(this_subject['non_inducing'])
     colors = this_subject[['r', 'g', 'b']].values.tolist() # use subject-specific colors 
         
