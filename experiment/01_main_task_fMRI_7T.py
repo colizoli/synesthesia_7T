@@ -41,14 +41,16 @@ conditions = ['inducing_black', 'non_inducing_black', 'inducing_congruent', 'non
 
 #Get subject number
 g = gui.Dlg()
+g.addField('Group (syn vs. con):')
 g.addField('Subject Number:')
 g.addField('Run:')
 g.show()
-subject_ID = int(g.data[0])
-run = int(g.data[1])
-# in case GUI doesn't work
-# subject_ID = 1
-# session = 1
+if g.data[0] == 'syn':
+    group = 'synesthete'
+else:
+    group = 'control'
+subject_ID = int(g.data[1])
+run = int(g.data[2])
 
 if subject_ID:
     random.seed(subject_ID)
@@ -57,10 +59,10 @@ if subject_ID:
     #########################################
     
     # get subject-specifc blocks and stimuli sequences
-    df_sequences = pd.read_csv(os.path.join('stimuli_blocks', 'main_task', 'sub-{}_letter_sequences_main_task.csv'.format(subject_ID)))
-    df_special = pd.read_csv(os.path.join('stimuli_blocks', 'main_task', 'sub-{}_letter_italics_main_task.csv'.format(subject_ID)))
-    df_condition = pd.read_csv(os.path.join('stimuli_blocks', 'main_task', 'sub-{}_block_type_main_task.csv'.format(subject_ID)))
-    df_map = pd.read_csv(os.path.join('stimuli_blocks', 'main_task', 'sub-{}_grapheme_color_map_main_task.csv'.format(subject_ID))) # maps graphemes to colors conditions #4,5
+    df_sequences = pd.read_csv(os.path.join('stimuli_blocks', 'main_task', 'sub-{}_letter_sequences_main_task.csv'.format(str(subject_ID).zfill(2))))
+    df_special = pd.read_csv(os.path.join('stimuli_blocks', 'main_task', 'sub-{}_letter_italics_main_task.csv'.format(str(subject_ID).zfill(2))))
+    df_condition = pd.read_csv(os.path.join('stimuli_blocks', 'main_task', 'sub-{}_block_type_main_task.csv'.format(str(subject_ID).zfill(2))))
+    df_map = pd.read_csv(os.path.join('stimuli_blocks', 'main_task', 'sub-{}_grapheme_color_map_main_task.csv'.format(str(subject_ID).zfill(2)))) # maps graphemes to colors conditions #4,5
     
     # get list
     blocks = df_condition.iloc[0].tolist() # conditions in order of blocks
@@ -98,13 +100,11 @@ if subject_ID:
     win.setMouseVisible(False)
 
     # Set-up stimuli and timing
-    instr_top = visual.TextStim(win, color='black', pos=(0.0, 130), wrapWidth=p.ww)
-    instr_bottom = visual.TextStim(win, color='black', pos=(0.0, -180), wrapWidth=p.ww)
+    instr_top = visual.TextStim(win, color='black', pos=(0.0, 130), wrapWidth=p.ww, height=p.ih)
+    instr_bottom = visual.TextStim(win, color='black', pos=(0.0, -180), wrapWidth=p.ww, height=p.ih)
     
     # Outer circle (grey)
-    stim_fix_outer = visual.Circle(win, radius=5, fillColor='grey', lineColor='grey', edges=128)
-    # Inner circle (black)
-    stim_fix_inner = visual.Circle(win, radius=2, fillColor='black', lineColor='black', edges=128)
+    stim_fix_outer = visual.Circle(win, radius=4, fillColor='grey', lineColor='grey', edges=128)
     
     stim_word = visual.TextStim(win, color ='black', pos=(0.0, p.ly), height=p.lh) # SET FONT HERE, SCALING
     
@@ -208,7 +208,6 @@ if subject_ID:
 
     instr_top.draw()
     stim_fix_outer.draw()
-    stim_fix_inner.draw()
     stim_question.draw()
     stim_yes.draw()
     stim_no.draw()
@@ -228,7 +227,6 @@ if subject_ID:
     # BOLD BASELINE (BEGINNING OF RUN) #
     ####################################
     stim_fix_outer.draw()
-    stim_fix_inner.draw()
     win.flip()
     # For quitting early
     respond = event.waitKeys(maxWait=p.t_bold_baseline, keyList=['q'])
@@ -324,7 +322,6 @@ if subject_ID:
                                        
             # Pre grapheme fixation cross (small jitter)
             stim_fix_outer.draw()
-            stim_fix_inner.draw() 
             win.flip()
             core.wait(np.random.uniform(*p.t_fix)) # *interval unpacks the interval from the list
 
@@ -333,7 +330,6 @@ if subject_ID:
             stim_word.setColor(this_color, 'rgb255')
             stim_word.draw() 
             stim_fix_outer.draw()
-            stim_fix_inner.draw()
             win.flip()
             this_word_time = clock.getTime() - first_pulse # get timing of word with respect to first pulse
             core.wait(p.t_grapheme)
@@ -373,7 +369,6 @@ if subject_ID:
         ### ADD WAIT FOR TRIGGER ? ###
         ############################
         # stim_fix_outer.draw()
-        # stim_fix_inner.draw()
         # win.flip()
         # p.waitForTrigger(clock)  # also clears events      
         
@@ -381,7 +376,6 @@ if subject_ID:
         
         # fixation only
         stim_fix_outer.draw()
-        stim_fix_inner.draw()
         win.flip()
         core.wait(prompt_onset)    
         
@@ -390,7 +384,6 @@ if subject_ID:
         stim_yes.draw()
         stim_no.draw()
         stim_fix_outer.draw()
-        stim_fix_inner.draw()
         win.flip()
 
         prompt_onset_time = clock.getTime() # marks when the prompt appeared, same clock as first_pulse
@@ -412,7 +405,6 @@ if subject_ID:
 
         # --- Phase 2: prompt gone, fixation only, keep monitoring for the remaining rest period ---
         stim_fix_outer.draw()
-        stim_fix_inner.draw()
         win.flip()
 
         remaining_time = p.t_rest - (prompt_onset + p.t_prompt) # time left in the rest block
@@ -468,7 +460,6 @@ if subject_ID:
     # BOLD BASELINE (END OF RUN) #
     ##############################
     stim_fix_outer.draw()
-    stim_fix_inner.draw()
     win.flip()
     core.wait(p.t_bold_baseline)
 
