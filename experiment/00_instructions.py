@@ -44,7 +44,7 @@ if subject_ID:
         key_to_answer = {'1': 'no', '2': 'yes'}
         yes_pos, no_pos = (50, -50), (-50, -50)
     
-    this_subject = pd.read_csv(os.path.join('colors', 'sub-{}_colors.csv'.format(subject_ID)))
+    this_subject = pd.read_csv(os.path.join('colors', 'sub-{}_colors.csv'.format(str(subject_ID).zfill(2))))
     graphemes    = list(this_subject['inducing'])     # synesthesia inducing graphemes
     symbols      = list(this_subject['non_inducing']) # graphemes that don't induce synesthesia
     
@@ -89,14 +89,12 @@ if subject_ID:
     # -------------------------
     
     # Set-up stimuli and timing
-    instr_top = visual.TextStim(win, color='black', pos=(0.0, 130), wrapWidth=p.ww)
-    instr_bottom = visual.TextStim(win, color='black', pos=(0.0, -180), wrapWidth=p.ww)
-    instr_center = visual.TextStim(win, color='black', pos=(0.0, 0.0), wrapWidth=p.ww)
+    instr_top = visual.TextStim(win, color='black', pos=(0.0, 130), wrapWidth=p.ww, height=p.ih)
+    instr_bottom = visual.TextStim(win, color='black', pos=(0.0, -180), wrapWidth=p.ww, height=p.ih)
+    instr_center = visual.TextStim(win, color='black', pos=(0.0, 0.0), wrapWidth=p.ww, height=p.ih)
     
     # Outer circle (grey)
-    stim_fix_outer = visual.Circle(win, radius=5, fillColor='grey', lineColor='grey', edges=128)
-    # Inner circle (black)
-    stim_fix_inner = visual.Circle(win, radius=2, fillColor='black', lineColor='black', edges=128)
+    stim_fix_outer = visual.Circle(win, radius=4, fillColor='grey', lineColor='grey', edges=128)
     
     stim_word = visual.TextStim(win, color ='black', pos=(0.0, 0.0), height=p.lh) # SET FONT HERE, SCALING
     
@@ -213,7 +211,6 @@ if subject_ID:
     stim_yes.draw()
     stim_no.draw()
     stim_fix_outer.draw()
-    stim_fix_inner.draw()
     # add this to continue
     instr_bottom.setText("[PUSH ANY BUTTON TO CONTINUE THE INSTRUCTIONS]")
     instr_bottom.draw()

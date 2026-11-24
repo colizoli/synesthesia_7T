@@ -23,7 +23,7 @@ from psychopy import core, visual, event, gui, monitors
 import random
 import numpy as np
 import pandas as pd
-# from IPython import embed as shell # for debugging only
+from IPython import embed as shell # for debugging only
 import mri_7T_parameters as p # see for timing, stimuli and parameters
 
 #########################################
@@ -32,25 +32,27 @@ import mri_7T_parameters as p # see for timing, stimuli and parameters
 
 #Get subject number
 g = gui.Dlg()
+g.addField('Group (syn vs. con):')
 g.addField('Subject Number:')
 g.addField('Run:')
 g.show()
-subject_ID = int(g.data[0])
-run = int(g.data[1])
-# in case GUI doesn't work
-# subject_ID = 1
-# run = 1
+if g.data[0] == 'syn':
+    group = 'synesthete'
+else:
+    group = 'control'
+subject_ID = int(g.data[1])
+run = int(g.data[2])
 
 if subject_ID:
-    random.seed(subject_ID)
+    random.seed(int(subject_ID))
     #########################################
     ################ STIMULI ################
     #########################################
     
     # get subject-specifc blocks and stimuli sequences
-    df_sequences = pd.read_csv(os.path.join('stimuli_blocks', 'color_localizer', 'sub-{}_letter_sequences_color_localizer.csv'.format(subject_ID)))
-    df_special = pd.read_csv(os.path.join('stimuli_blocks', 'color_localizer', 'sub-{}_letter_italics_color_localizer.csv'.format(subject_ID)))
-    df_condition = pd.read_csv(os.path.join('stimuli_blocks', 'color_localizer', 'sub-{}_block_type_color_localizer.csv'.format(subject_ID)))
+    df_sequences = pd.read_csv(os.path.join('stimuli_blocks', 'color_localizer', 'sub-{}_run-{}_letter_sequences_color_localizer.csv'.format(str(subject_ID).zfill(2), str(run).zfill(2))))
+    df_special = pd.read_csv(os.path.join('stimuli_blocks', 'color_localizer', 'sub-{}_run-{}_letter_italics_color_localizer.csv'.format(str(subject_ID).zfill(2), str(run).zfill(2))))
+    df_condition = pd.read_csv(os.path.join('stimuli_blocks', 'color_localizer', 'sub-{}_run-{}_block_type_color_localizer.csv'.format(str(subject_ID).zfill(2), str(run).zfill(2))))
     # get list
     blocks = df_condition.iloc[0].tolist() # color, black in order of blocks
 
@@ -87,12 +89,10 @@ if subject_ID:
     win.setMouseVisible(False)
 
     # Set-up stimuli and timing
-    instr_top = visual.TextStim(win, color='black', pos=(0.0, 130), wrapWidth=p.ww)
-    instr_bottom = visual.TextStim(win, color='black', pos=(0.0, -180), wrapWidth=p.ww)
+    instr_top = visual.TextStim(win, color='black', pos=(0.0, 130), wrapWidth=p.ww, height=p.ih)
+    instr_bottom = visual.TextStim(win, color='black', pos=(0.0, -180), wrapWidth=p.ww, height=p.ih)
     # Outer circle (grey)
-    stim_fix_outer = visual.Circle(win, radius=5, fillColor='grey', lineColor='grey', edges=128)
-    # Inner circle (black)
-    stim_fix_inner = visual.Circle(win, radius=2, fillColor='black', lineColor='black', edges=128)
+    stim_fix_outer = visual.Circle(win, radius=4, fillColor='grey', lineColor='grey', edges=128)
     
     stim_word = visual.TextStim(win, color ='black', pos=(0.0, p.ly), height=p.lh) # SET FONT HERE, SCALING
     stim_word.fontFiles = [
@@ -147,7 +147,7 @@ if subject_ID:
     #######################
     ## Create LogFile folder cwd/LogFiles
     cwd = os.getcwd()
-    logfile_dir = os.path.join(cwd, 'sourcedata', 'sub-{}'.format(subject_ID), 'func')  # system independent
+    logfile_dir = os.path.join(cwd, 'sourcedata', 'sub-{}{}'.format(group, str(subject_ID).zfill(2)), 'func')  # system independent
     
     if not os.path.isdir(logfile_dir): # make the folder if it doesn't exist already
         os.makedirs(logfile_dir)
@@ -155,7 +155,8 @@ if subject_ID:
     ## output file name with time stamp prevents any overwriting of data
     timestr = time.strftime("%Y%m%d-%H%M%S") 
     # bids format    
-    output_filename = os.path.join(logfile_dir, 'sub-{}_task-colorsloc_run-{}_events_{}.tsv'.format(subject_ID, run, timestr))
+    output_filename = os.path.join(logfile_dir, 'sub-{}{}_task-colorsloc_run-{}_events_{}.tsv'.format(group, str(subject_ID).zfill(2), run, timestr))
+    pulses_filename = os.path.join(logfile_dir, 'sub-{}{}_task-colorsloc_run-{}_pulses_{}.tsv'.format(group, str(subject_ID).zfill(2), run, timestr))
  
     cols = ['subject',
               'run',
@@ -183,7 +184,8 @@ if subject_ID:
 
     # define clock!
     clock = core.Clock()
-    
+    p.open_ports() # serial ports stay open for the whole run
+
     #####################################
     # Instructions, waiting for scanner #
     #####################################
@@ -193,7 +195,6 @@ if subject_ID:
 
     instr_top.draw()
     stim_fix_outer.draw()
-    stim_fix_inner.draw()
     stim_question.draw()
     stim_yes.draw()
     stim_no.draw()
@@ -213,14 +214,9 @@ if subject_ID:
     # BOLD BASELINE (BEGINNING OF RUN) #
     ####################################
     stim_fix_outer.draw()
-    stim_fix_inner.draw()
     win.flip()
-    # Wait for bold baseline, catch buttons for quitting early
-    respond = event.waitKeys(maxWait=p.t_bold_baseline, keyList=['q'])
-    if respond:
-        key_pressed, latency = respond[0]
-        if key_pressed == 'q':
-            core.quit()
+    # Wait for bold baseline, keeps logging pulses, 'q' quits
+    p.wait(p.t_bold_baseline, clock)
     
     ##################
     #### MAIN LOOP ###
@@ -253,9 +249,8 @@ if subject_ID:
                            
             # Pre grapheme fixation cross (small jitter)
             stim_fix_outer.draw()
-            stim_fix_inner.draw() 
             win.flip()
-            core.wait(np.random.uniform(*p.t_fix)) # *interval unpacks the interval from the list
+            p.wait(np.random.uniform(*p.t_fix), clock) # *interval unpacks the interval from the list
 
             # Present grapheme
             this_grapheme = symbols[this_grapheme_idx]
@@ -269,10 +264,9 @@ if subject_ID:
             stim_word.setColor(this_color, 'rgb255')
             stim_word.draw() 
             stim_fix_outer.draw()
-            stim_fix_inner.draw()
             win.flip()
             this_word_time = clock.getTime() - first_pulse # get timing of word with respect to first pulse
-            core.wait(p.t_grapheme)
+            p.wait(p.t_grapheme, clock) # keeps logging pulses, 'q' quits
 
             # Save trial data       
             DF.loc[counter_main] = [subject_ID,     # Subject number
@@ -295,20 +289,12 @@ if subject_ID:
                                     
             DF.to_csv(output_filename,sep='\t')
             counter_main = counter_main+1
-            
-            # For quitting early
-            pressed = event.getKeys()
-            if pressed:
-                # q quits the experiment
-                if pressed[0] == 'q':
-                    core.quit()
-        
+
         #### END OF CURRENT BLOCK ####
         ############################
         ### ADD WAIT FOR TRIGGER ? ###
         ############################
         # stim_fix_outer.draw()
-        # stim_fix_inner.draw()
         # win.flip()
         # p.waitForTrigger(clock)  # also clears events      
         
@@ -316,30 +302,29 @@ if subject_ID:
         
         # fixation only
         stim_fix_outer.draw()
-        stim_fix_inner.draw()
         win.flip()
-        core.wait(prompt_onset)    
+        p.wait(prompt_onset, clock)
         
         # show prompt + fixation
         stim_question.draw()
         stim_yes.draw()
         stim_no.draw()
         stim_fix_outer.draw()
-        stim_fix_inner.draw()
         win.flip()
 
         prompt_onset_time = clock.getTime() # marks when the prompt appeared, same clock as first_pulse
-        event.clearEvents() # clear any leftover keypresses in the buffer before monitoring
+        p.clear_responses(clock) # clear leftover key/button presses (pulses are logged first)
 
         response_key = None
         response_time = np.nan
 
         # --- Phase 1: prompt visible, monitor for a response ---
         while clock.getTime() - prompt_onset_time < p.t_prompt:
-            pressed = event.getKeys(keyList=p.keys + ['q'], timeStamped=clock)
+            pressed = p.get_responses(clock, p.keys + ['q']) # keyboard + serial buttons, also logs pulses
             if pressed:
                 key_name, press_time = pressed[0]
                 if key_name == 'q':
+                    p.close_ports()
                     core.quit()
                 if response_key is None: # only take the first response
                     response_key = key_name
@@ -347,17 +332,17 @@ if subject_ID:
 
         # --- Phase 2: prompt gone, fixation only, keep monitoring for the remaining rest period ---
         stim_fix_outer.draw()
-        stim_fix_inner.draw()
         win.flip()
 
         remaining_time = p.t_rest - (prompt_onset + p.t_prompt) # time left in the rest block
 
         fixation_onset_time = clock.getTime()
         while clock.getTime() - fixation_onset_time < remaining_time:
-            pressed = event.getKeys(keyList=p.keys + ['q'], timeStamped=clock)
+            pressed = p.get_responses(clock, p.keys + ['q']) # keyboard + serial buttons, also logs pulses
             if pressed:
                 key_name, press_time = pressed[0]
                 if key_name == 'q':
+                    p.close_ports()
                     core.quit()
                 if response_key is None: # still only take the FIRST response overall
                     response_key = key_name
@@ -396,15 +381,15 @@ if subject_ID:
                                 correct             # 1 = correct, 0 = incorrect or missing
                                 ]
         DF.to_csv(output_filename, sep='\t')
+        p.save_pulses(pulses_filename, first_pulse) # save pulses so far (in case of quitting early)
         counter_main = counter_main + 1
         
     ##############################
     # BOLD BASELINE (END OF RUN) #
     ##############################
     stim_fix_outer.draw()
-    stim_fix_inner.draw()
     win.flip()
-    core.wait(p.t_bold_baseline)
+    p.wait(p.t_bold_baseline, clock)
 
 # Scan time
 print('Scan time (s) = {}'.format(clock.getTime() - first_pulse))
@@ -417,6 +402,8 @@ stim_word.font = 'Arial'
 stim_word.height = 20
 stim_word.draw() 
 win.flip()
-core.wait(3) # just wait max 1 TR for scanner to stop
+p.wait(3, clock) # just wait max 1 TR for scanner to stop (pulses still logged)
+p.save_pulses(pulses_filename, first_pulse) # all pulses of the run, onset re: first pulse
+p.close_ports()
 win.close()
 core.quit()
