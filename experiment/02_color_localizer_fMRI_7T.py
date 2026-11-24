@@ -155,8 +155,8 @@ if subject_ID:
     ## output file name with time stamp prevents any overwriting of data
     timestr = time.strftime("%Y%m%d-%H%M%S") 
     # bids format    
-    output_filename = os.path.join(logfile_dir, 'sub-{}{}_task-colorsloc_run-{}_events_{}.tsv'.format(group, str(subject_ID).zfill(2), run, timestr))
-    pulses_filename = os.path.join(logfile_dir, 'sub-{}{}_task-colorsloc_run-{}_pulses_{}.tsv'.format(group, str(subject_ID).zfill(2), run, timestr))
+    output_filename = os.path.join(logfile_dir, 'sub-{}{}_task-colorloc_run-{}_events_{}.tsv'.format(group, str(subject_ID).zfill(2), str(run).zfill(2), timestr))
+    pulses_filename = os.path.join(logfile_dir, 'sub-{}{}_task-colorloc-run-{}_pulses_{}.tsv'.format(group, str(subject_ID).zfill(2), str(run).zfill(2), timestr))
  
     cols = ['subject',
               'run',

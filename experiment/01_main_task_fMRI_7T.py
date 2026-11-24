@@ -161,7 +161,7 @@ if subject_ID:
     #######################
     ## Create LogFile folder cwd/LogFiles
     cwd = os.getcwd()
-    logfile_dir = os.path.join(cwd, 'sourcedata', 'sub-{}'.format(subject_ID), 'func')  # system independent
+    logfile_dir = os.path.join(cwd, 'sourcedata', 'sub-{}{}'.format(group, str(subject_ID).zfill(2)), 'func')  # system independent
     
     if not os.path.isdir(logfile_dir): # make the folder if it doesn't exist already
         os.makedirs(logfile_dir)
@@ -169,8 +169,8 @@ if subject_ID:
     ## output file name with time stamp prevents any overwriting of data
     timestr = time.strftime("%Y%m%d-%H%M%S") 
     # bids format    
-    output_filename = os.path.join(logfile_dir, 'sub-{}_task-main_run-{}_events_{}.tsv'.format(subject_ID, run, timestr))
-    pulses_filename = os.path.join(logfile_dir, 'sub-{}_task-main_run-{}_pulses_{}.tsv'.format(subject_ID, run, timestr))
+    output_filename = os.path.join(logfile_dir, 'sub-{}{}_task-main_run-{}_events_{}.tsv'.format(group, str(subject_ID).zfill(2), str(run).zfill(2), timestr))
+    pulses_filename = os.path.join(logfile_dir, 'sub-{}{}_task-main_run-{}_pulses_{}.tsv'.format(group, str(subject_ID).zfill(2), str(run).zfill(2), timestr))
  
     cols = ['subject',
               'run',
